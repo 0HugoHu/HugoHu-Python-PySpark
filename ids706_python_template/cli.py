@@ -7,22 +7,31 @@ Be creative! do whatever you want!
 - Start a web application
 - Import things from your .base module
 """
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import avg
 
 
 def main():  # pragma: no cover
-    """
-    The main function executes on commands:
-    `python -m ids706_python_template` and `$ ids706_python_template `.
+    # Initialize a Spark session
+    spark = SparkSession.builder.appName("LargeDatasetProcessing").getOrCreate()
 
-    This is your program's entry point.
+    # Load the CSV file into a DataFrame
+    df = spark.read.csv("large_dataset.csv", header=True, inferSchema=True)
 
-    You can change this function to do whatever you want.
-    Examples:
-        * Run a test suite
-        * Run a server
-        * Do some other stuff
-        * Run a command line application (Click, Typer, ArgParse)
-        * List all available tasks
-        * Run an application (Flask, FastAPI, Django, etc.)
-    """
-    print("This will do something")
+    # Show the first few rows of the DataFrame
+    df.show()
+
+    # Perform some data processing on the DataFrame
+    # For example, calculate the average salary of the employees
+    average_salary = df.groupBy().avg("salary").collect()[0][0]
+
+    print(f"Average Salary: {average_salary:.2f}")
+
+    # Group by department and calculate the average salary
+    department_avg_salary = df.groupBy("department").agg(avg("salary").alias("avg_salary"))
+
+    department_avg_salary.show()
+
+    # Stop the Spark session when done
+    spark.stop()
+
